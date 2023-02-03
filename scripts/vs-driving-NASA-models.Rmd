@@ -1,0 +1,471 @@
+---
+title: "Analysis & Models"
+output: pdf_document
+date: '2022-09-08'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(gplots)
+library(lme4)
+library(nlme)
+library(sjPlot)
+library(lmerTest)
+library(glmmTMB)
+library(sjPlot)
+library(dplyr)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+library(ggpubr)
+library(Rmisc)
+library(hrbrthemes)
+library(cowplot)
+```
+
+```{r, echo=FALSE, warning=FALSE}
+root_dir <- getwd()
+project_directory<-dirname(root_dir)
+raw_data_dir <- file.path(project_directory, 'data')
+plot_dir <- file.path(project_directory, 'plots')
+script_dir<- file.path(project_directory, 'scripts')
+log_dir <- file.path(project_directory, 'log-files')
+```
+
+```{r, echo=FALSE}
+file_name = 'Model_Data.csv'
+tmpD = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
+
+```
+
+
+
+```{r, echo=FALSE}
+alpha<-0.05
+S<-as.factor(tmpD$P_ID)
+Mean_Raw_HR<-tmpD$Mean_Raw_HR
+Y<-Mean_Raw_HR
+MMnDHR<-tmpD$Morning_Mean_Non_Drive_Hr
+AMnDHR<-tmpD$Afternoon_Mean_Non_Drive_Hr
+DN<-as.factor(tmpD$Day_Num)
+
+Dbin<-rep("Weekday",length(DN))
+Dbin[(DN=="Day6")|((DN=="Day7"))]<-"Weekend"
+Dbin<-as.factor(Dbin)
+
+
+TrTi<-factor(tmpD$Trip_Time,levels=c("Morning","Afternoon"))
+TrNu<-as.factor(tmpD$Trips)
+WI<-as.factor(tmpD$Weather_Info)
+Ge<-as.factor(tmpD$Gender)
+RelAcc<-as.factor(tmpD$Acc)
+DrTraf<-as.factor(tmpD$DrTraf)
+DrRain<-as.factor(tmpD$DrRain)
+DrNi<-as.factor(tmpD$DrNi)
+DrLike<-as.factor(tmpD$DrLike)
+AGE<-tmpD$Age
+
+
+TrDu<-tmpD$Trip_Duration
+MSp<-tmpD$Mean_Speed
+SDSp<-tmpD$SD_Speed
+
+
+MATP<-tmpD$Mean_ATP
+SDATP<-tmpD$SD_ATP
+
+MRTP<-tmpD$Mean_RTP
+SDRTP<-tmpD$SD_RTP
+
+MJF<-tmpD$Mean_JF
+SDJF<-tmpD$SD_JF
+
+
+
+MAccE<-tmpD$mean_acc_energy
+SDAccE<-tmpD$sd_acc_energy
+
+MRotE<-tmpD$mean_rot_energy
+SDRotE<-tmpD$sd_rot_energy
+
+
+TNsc<-tmpD$MD+tmpD$PD+tmpD$TD+tmpD$P+tmpD$E+tmpD$F
+NASA_MD<-tmpD$MD
+NASA_PD<-tmpD$PD
+NASA_TD<-tmpD$TD
+NASA_P<-tmpD$P
+NASA_E<-tmpD$E
+NASA_F<-tmpD$F
+
+NASAall<-data.frame(NASA_MD,NASA_PD,NASA_TD,NASA_P,NASA_E,NASA_F)
+NASAnames<-c("NASA_MD","NASA_PD","NASA_TD","NASA_P","NASA_E","NASA_F")
+
+
+SA<-tmpD$State_Anxiety
+TA<-tmpD$Trait_Anxiety
+Ex<-tmpD$Extraversion
+Agr<-tmpD$Agreeableness
+Co<-tmpD$Conscientiousness
+Ne<-tmpD$Neuroticism
+Op<-tmpD$Openness
+
+```
+
+
+
+```{r, echo=FALSE}
+D<-data.frame(Y,DN,Dbin,TrTi,TrNu,WI,Ge,RelAcc,DrTraf,DrRain,DrNi,DrLike,TrDu,MSp,SDSp,MATP,SDATP,MRTP,SDRTP,MJF,SDJF,
+              MAccE, SDAccE, MRotE, SDRotE,
+              AGE,TA,Ex,Agr,Co,Ne,Op,TNsc,SA,MMnDHR,AMnDHR,S)
+
+VarNames<-c("Mean HR",
+            "Day Number","Weekday/Weekend indicator",
+            "Trip Time","Trip Number","Weather Info","Gender",
+            "Relish Acceleration","Driving with Traffic","Driving with Rain",
+            "Driving at Night","Like to drive",
+            "Trip Duration","Mean Speed","SD Speed","Mean Absolute Throtle Position", 
+            "SD Absolute Throtle Position","Mean Relative Throtle Position", 
+            "SD Relative Throtle Position","Mean Jam Factor","SD Jam Factor",
+            "Mean Accelerometer Energy","SD Accelerometer Energy",
+            "Mean Rotation Energy","SD Rotation Energy",
+            "Age","Trait Anxiety","Extraversion",
+            "Agreeableness","Conscientiousness","Neuroticism","Openness",
+            "Total NASA score", "State Anxiety",
+            "Morning_Mean_Non_Drive_Hr","Afternoon_Mean_Non_Drive_Hr","Subject ID")
+
+### The following are the categorical explanatory variable
+tmpCAT<-c(3:13)
+
+### The following are the numerical explanatory variable
+tmpNUM<-c(14:33)
+
+
+
+NASAall$Dbin = Dbin
+NASAall$TrTi = TrTi
+NASAall$S = S
+
+
+Non_Drive_HR <- c(MMnDHR, AMnDHR)
+MAind<-c(rep("Morning", length(MMnDHR)),rep("Afternoon", length(AMnDHR)))
+MAind<-factor(MAind,levels=c("Morning","Afternoon"))
+
+WEind<-c(Dbin,Dbin)
+WEind<-factor(WEind,levels=c("Weekday","Weekend"))
+
+Sub<-as.factor(c(S,S))
+
+```
+
+
+
+
+```{r, echo=FALSE}
+levels = c("A", "B", "C")
+num = c(5, 10, 15)
+ymin = c(0, 0, 0)
+ymax = c(1, 2, 3)
+
+Legend_DF = data.frame(levels, num, ymin, ymax)
+
+
+
+plot <- ggplot(Legend_DF, aes(x = levels, y = num, colour = levels)) +
+  geom_errorbar(aes(ymin = ymin, ymax = ymax), size = 1.1) +
+  theme_bw() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text.x = element_text(face = "bold", size = 10),
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.title = element_blank(),
+    legend.key.width = unit(2, 'cm'),
+    legend.text = element_text(size = 20)
+  ) +
+  theme(axis.ticks.y = element_blank(),
+        axis.ticks.x = element_blank()) +
+  scale_color_manual(
+    values = c("#4CAEE3", "#ee9a00", "red"),
+    breaks = c("A", "B", "C"),
+    labels = c("*     ", "**     ", "***")
+  ) 
+# print(plot)
+
+legend = get_legend(plot)
+```
+
+```{r, echo=FALSE, warning=FALSE}
+orange = "#ee9a00"
+blue = "#4CAEE3"
+
+ticks_font = element_text(size = 8, face = "bold")
+title_font = element_text(size = 9, face = "bold", hjust = 0.5)
+legend_font = element_text(size = 8, face = "bold")
+
+y_titie = expression(bolditalic(TLX[E]))
+
+Nasa_Effort_Model <-
+  lmer(NASA_E ~ 1 + TrTi * Dbin + (1 | S))
+summary(Nasa_Effort_Model)
+
+Nasa_Temporal_model <-
+  lmer(NASA_TD ~ 1 + TrTi * Dbin +  (1 | S))
+summary(Nasa_Temporal_model)
+
+Nasa_effort_1 = plot_model(Nasa_Effort_Model, type = "pred", terms = "TrTi") +   
+  aes(color = c("Morning", "Afternoon")) +
+  scale_color_manual(labels = c("Morning", "Afternoon"), values = c(orange, "gray")) +
+  theme_bw() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "none",
+    panel.grid = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = title_font,
+    axis.text.x = ticks_font,
+    axis.text.y = ticks_font,
+    plot.title = element_blank()
+  ) + labs(y = y_titie) +  ylim(.5, 3)
+# Nasa_effort_1
+
+Nasa_effort_2 = plot_model(Nasa_Effort_Model,
+                           type = "pred",
+                           terms = c("Dbin", "TrTi")) +
+  aes(color = c("Afternoon", "Morning", "Afternoon", "Morning")) +
+  scale_color_manual(
+    labels = c("Morning", "Afternoon", "Morning", "Afternoon"),
+    values = c("gray", blue)
+  ) +
+  theme_bw() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = c(0.5, 0.7),
+    legend.text = legend_font,
+    panel.grid = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.x = ticks_font,
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    plot.title = element_blank()
+  ) + ylim(.5, 3)
+# Nasa_effort_2
+
+
+y_titie = expression(bolditalic(TLX[TD]))
+NASA_TD_plot1 = plot_model(Nasa_Temporal_model, type = "pred", terms = "Dbin") +
+  aes(color = c("Weekday","Weekend")) +
+  scale_color_manual(labels = c("Weekday","Weekend"), values = c("gray", blue)) +
+  theme_bw() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "none",
+    panel.grid = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = title_font,
+    axis.text.x = ticks_font,
+    axis.text.y = ticks_font,
+    plot.title = element_blank()
+  ) + labs(y = y_titie) + ylim(.5, 3)
+# NASA_TD_plot1
+
+
+
+
+
+
+NASA_Model_Plot =
+  plot_grid(
+    plot_grid(
+      NASA_TD_plot1,
+      plot_grid(Nasa_effort_1, Nasa_effort_2, nrow = 1),
+      nrow = 1,
+      scale = c(.97, .97),
+      labels = c("a", "b"),
+      rel_widths = c(1, 2)
+    ),
+    legend,
+    nrow = 2,
+    rel_heights = c(1, .1)
+  )
+
+NASA_Model_Plot
+
+file_name = "Figure7.pdf"
+ggsave(
+  file.path(plot_dir, file_name),
+  NASA_Model_Plot,
+  width = 8.5,
+  height = 2.75,
+  units = "in"
+)
+```
+
+
+
+
+```{r, echo=FALSE}
+FullModel = lmer(Y ~ 1 + TrTi + Dbin + WI + Ge + MJF + TA + Ex + Agr + Co + Op + Ne + SA + MSp + MATP +  MAccE + MRotE+ TNsc + (1|S),data=D)
+step_fm <- step(FullModel)
+step_fm # Display elimination results
+final_fm <- get_model(step_fm)
+```
+```{r, echo=FALSE}
+FM<-lmer(Y ~ TrTi + Dbin + Ge + TA + Co + MSp + (1 | S), data = D)
+summary(FM)
+```
+
+
+```{r, echo=FALSE, warning=FALSE}
+ticks_font = element_text(size = 9, face = "bold")
+title_font = element_text(size = 9, face = "bold", hjust = 0.5)
+orange = "#ee9a00"
+blue = "#4CAEE3"
+
+y_titie = expression(paste(bar(bolditalic("DHR")), bold(" [ BPM ]")))
+# y_titie = paste(y_titie, "[ BPM ]")
+
+Gender = plot_model(FM, "pred", terms = "Ge") +
+  aes(color = c("Female", "Male")) + 
+  scale_color_manual(labels = c("Female", "Male"),values = c("gray", "orange")) +
+theme_bw() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "none",
+    panel.grid = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = title_font,
+    axis.text.x = ticks_font,
+    axis.text.y = ticks_font,
+    plot.title = element_blank(),
+  ) + labs(y = y_titie) + ylim(70, 100)
+
+# Gender
+
+WeekWeekend = plot_model(FM, "pred", terms = "Dbin") +
+  aes(color = c("Weekdays", "Weekend")) +
+  scale_color_manual(labels = c("Weekdays", "Weekend"),values = c("gray", blue)) +
+  theme_bw() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "none",
+    panel.grid = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.x = ticks_font,
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    plot.title = element_blank()
+  )  + ylim(70, 100)
+# WeekWeekend
+
+
+MornAft = plot_model(FM, "pred", terms = "TrTi") +
+  aes(color = c("Morning", "Afternoon")) +
+  scale_color_manual(labels = c("Morning", "Afternoon"), values = c("red", "gray")) +
+  theme_bw() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "none",
+    panel.grid = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.x = ticks_font,
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    plot.title = element_blank()
+  ) + ylim(70, 100)
+
+# MornAft
+
+
+
+
+Trait = plot_model(FM, "pred", terms = "TA") +
+  aes(color = "TA") +
+  scale_color_manual(values = orange) +
+  geom_vline(
+    xintercept = mean(D$TA),
+    linetype = "dashed",
+    color = "gray",
+    size = 1
+  ) +
+  theme_bw() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "none",
+    panel.grid = element_blank(),
+    axis.title.x = title_font,
+    axis.title.y = title_font,
+    axis.text.x = ticks_font,
+    axis.text.y = ticks_font,
+    plot.title = element_blank(),
+  ) + labs(y = y_titie, x = "Trait Anxiety") + ylim(60, 100)
+# Trait
+
+
+CON = plot_model(FM, "pred", terms = "Co") +
+  aes(color = "Co") +
+  scale_color_manual(values = orange) +
+  geom_vline(
+    xintercept = mean(D$Co),
+    linetype = "dashed",
+    color = "gray",
+    size = 1
+  ) +
+  theme_bw() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "none",
+    panel.grid = element_blank(),
+    axis.title.x = title_font,
+    axis.title.y = element_blank(),
+    axis.text.x = ticks_font,
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    plot.title = element_blank()
+  ) + labs(x = "Conscientiousness") + ylim(60, 90)
+# CON
+
+
+Speed = plot_model(FM, "pred", terms = "MSp") +
+  aes(color = "MSp") +
+  scale_color_manual(values = blue) +
+  geom_vline(
+    xintercept = mean(D$MSp),
+    linetype = "dashed",
+    color = "gray",
+    size = 1
+  ) +
+  theme_bw() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "none",
+    panel.grid = element_blank(),
+    axis.title.x = title_font,
+    axis.title.y = element_blank(),
+    axis.text.x = ticks_font,
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    plot.title = element_blank()
+  ) + labs( x = "Speed [ MPH ]") + ylim(70, 100)
+# Speed
+
+
+grid1 = plot_grid(Gender, WeekWeekend, MornAft, ncol = 3)
+grid2 = plot_grid(Trait, CON, Speed, ncol = 3)
+
+
+final_plot = plot_grid(grid1, legend, grid2, nrow = 3, labels = c("a", "", "b"), scale = c(.95, 0.95,.95), rel_heights = c(1,.1,1))
+final_plot
+
+file_name = "Figure5.pdf"
+ggsave(
+  file.path(plot_dir, file_name),
+  final_plot,
+  width = 8.5,
+  height = 5.5,
+  units = "in"
+)
+
+```

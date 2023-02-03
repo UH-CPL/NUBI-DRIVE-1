@@ -1,0 +1,541 @@
+---
+title: "New_Model"
+output: pdf_document
+date: '2022-10-12'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(gplots)
+library(lme4)
+library(nlme)
+library(sjPlot)
+library(lmerTest)
+library(glmmTMB)
+library(sjPlot)
+library(dplyr)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+library("ggpubr")
+library(cowplot)
+library(ggcorrplot)
+library(data.table)
+library(mltools)
+```
+
+```{r, echo=FALSE, warning=FALSE}
+root_dir <- getwd()
+project_directory<-dirname(root_dir)
+raw_data_dir <- file.path(project_directory, 'data')
+plot_dir <- file.path(project_directory, 'plots')
+script_dir<- file.path(project_directory, 'scripts')
+log_dir <- file.path(project_directory, 'log-files')
+```
+
+
+
+```{r, echo=FALSE}
+file_name = 'Model_Data.csv'
+Data = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
+
+```
+
+```{r, echo=FALSE}
+
+dim(Data)
+### Level of significance for tests
+alpha<-0.05
+
+
+### Here are the Random Effects (Subjects)
+S<-as.factor(Data$P_ID)
+table(S)
+length(table(S))  ### This is the total number of available subjects
+sum(table(S))     ### Number of drives for the analysis
+
+
+### Here we will define the response variable of interest
+### This is the normalized version of the HR
+
+Mean_NR_HR_SD<-Data$Mean_NR_HR_SD
+Mean_NR_HR_2SD<-Data$Mean_NR_HR_2SD
+# summary(Mean_NR_HR)
+
+### This is the non-normalized version of the HR
+Mean_Raw_HR<-Data$Mean_Raw_HR
+summary(Mean_Raw_HR)
+
+### This is the response under study
+
+# Y<-Mean_Raw_HR
+Y<-Mean_Raw_HR
+summary(Y)
+
+YnormSD<-Mean_NR_HR_SD
+Ynorm2SD<-Mean_NR_HR_2SD
+# summary(Ynorm)
+
+### Here are some more info related to response variables
+### Morning Non-Drive HR
+MMnDHR<-Data$Morning_Mean_Non_Drive_Hr
+summary(MMnDHR)
+### Afternoon Non-Drive HR
+AMnDHR<-Data$Afternoon_Mean_Non_Drive_Hr
+summary(AMnDHR)
+
+
+### Here we will define the discrete explanatory variables
+DN<-as.factor(Data$Day_Num)
+table(DN)
+### Day_Num=1-5 correspond to weekdays, while Day_Num=6,7 are weekends
+### We will create a new binary variable D to indicate Weekday/Weekend
+Dbin<-rep("Weekday",length(DN))
+Dbin[(DN=="Day6")|((DN=="Day7"))]<-"Weekend"
+Dbin<-as.factor(Dbin)
+table(Dbin)
+
+TrTi<-factor(Data$Trip_Time,levels=c("Morning","Afternoon"))
+table(TrTi)
+
+TrNu<-as.factor(Data$Trips)
+table(TrNu)
+
+WI<-as.factor(Data$Weather_Info)
+table(WI)
+
+
+Ge<-as.factor(Data$Gender)
+table(Ge)
+
+
+RelAcc<-as.factor(Data$Acc)
+table(RelAcc)
+
+DrTraf<-as.factor(Data$DrTraf)
+table(DrTraf)
+
+DrRain<-as.factor(Data$DrRain)
+table(DrRain)
+
+DrNi<-as.factor(Data$DrNi)
+table(DrNi)
+
+DrLike<-as.factor(Data$DrLike)
+table(DrLike)
+
+
+## newly added features
+DrExp = as.factor(Data$DrExp)
+table(DrExp)
+
+
+DrMo<-as.factor(Data$DrMo)
+table(DrMo)
+
+SAE5 = as.factor(Data$When.cars.become.capable.of.fully.automated.driving)
+table(SAE5)
+
+
+TextDr<-as.factor(Data$TextDr)
+table(TextDr)
+
+
+TalkDr<-as.factor(Data$TalkDr)
+table(TalkDr)
+
+
+CoffeeDr<-as.factor(Data$CoffeeDr)
+table(CoffeeDr)
+
+
+Tickets<-as.factor(Data$Tickets)
+table(Tickets)
+
+
+Crash<-as.factor(Data$Crash)
+table(Crash)
+
+ReRdRg<-as.factor(Data$ReRdRg)
+table(ReRdRg)
+## newly added features
+
+
+
+### Here are the continuous explanatory variables
+AGE<-Data$Age
+table(AGE)
+summary(AGE)
+sAGE<-scale(AGE)
+summary(sAGE)
+
+### These are the related to driving
+TrDu<-Data$Trip_Duration
+summary(TrDu)
+sTrDu<-scale(TrDu)
+summary(sTrDu)
+
+MSp<-Data$Mean_Speed
+summary(MSp)
+sMSp<-scale(MSp)
+summary(sMSp)
+SDSp<-Data$SD_Speed
+summary(SDSp)
+sSDSp<-scale(SDSp)
+summary(sSDSp)
+
+
+
+MFFSPEED = Data$Mean_FF_Speed
+
+MATP<-Data$Mean_ATP
+summary(MATP)
+sMATP<-scale(MATP)
+summary(sMATP)
+SDATP<-Data$SD_ATP
+summary(SDATP)
+sSDATP<-scale(SDATP)
+summary(sSDATP)
+
+
+MRTP<-Data$Mean_RTP
+summary(MRTP)
+sMRTP<-scale(MRTP)
+summary(sMRTP)
+SDRTP<-Data$SD_RTP
+summary(SDRTP)
+sSDRTP<-scale(SDRTP)
+summary(sSDRTP)
+
+
+MJF<-Data$Mean_JF
+summary(MJF)
+sMJF<-scale(MJF)
+summary(sMJF)
+SDJF<-Data$SD_JF
+summary(SDJF)
+sSDJF<-scale(SDJF)
+summary(sSDJF)
+
+
+MAccE<-Data$mean_acc_energy
+summary(MAccE)
+sMAccE<-scale(MAccE)
+summary(sMAccE)
+SDAccE<-Data$sd_acc_energy
+summary(SDAccE)
+sSDAccE<-scale(SDAccE)
+summary(sSDAccE)
+
+
+MRotE<-Data$mean_rot_energy
+summary(MRotE)
+sMRotE<-scale(MRotE)
+summary(sMRotE)
+
+
+
+
+### Here are the continuous explanatory variables related to 
+### performance measures as TOTAL NASA score at drive level 
+TNsc<-Data$MD+Data$PD+Data$TD+Data$P+Data$E+Data$F
+summary(TNsc)
+sTNsc<-scale(TNsc)
+summary(sTNsc)
+
+
+### Here are the individual NASA scores
+NASA_MD<-Data$MD
+NASA_PD<-Data$PD
+NASA_TD<-Data$TD
+NASA_P<-Data$P
+NASA_E<-Data$E
+NASA_F<-Data$F
+
+NASAall<-data.frame(NASA_MD,NASA_PD,NASA_TD,NASA_P,NASA_E,NASA_F)
+NASAnames<-c("NASA_MD","NASA_PD","NASA_TD","NASA_P","NASA_E","NASA_F")
+
+
+### Here are the continuous explanatory variables related to psychometric
+### scores, which are constant at drive level
+SA<-Data$State_Anxiety
+summary(SA)
+sSA<-scale(SA)
+summary(sSA)
+
+### Here are the continuous explanatory variables related to psychometric
+### scores, which are constant at subject level (for all drives) 
+TA<-Data$Trait_Anxiety
+summary(TA)
+sTA<-scale(TA)
+summary(sTA)
+
+Ex<-Data$Extraversion
+summary(Ex)
+sEx<-scale(Ex)
+summary(sEx)
+
+Agr<-Data$Agreeableness
+summary(Agr)
+sAgr<-scale(Agr)
+summary(sAgr)
+
+Co<-Data$Conscientiousness
+summary(Co)
+sCo<-scale(Co)
+summary(sCo)
+
+Ne<-Data$Neuroticism
+summary(Ne)
+sNe<-scale(Ne)
+summary(sNe)
+
+Op<-Data$Openness
+summary(Op)
+sOp<-scale(Op)
+summary(sOp)
+
+```
+
+```{r, echo=FALSE}
+D <-
+  data.frame(
+    Y,
+    YnormSD,
+    Ynorm2SD,
+    DN,
+    Dbin,
+    TrTi,
+    TrNu,
+    WI,
+    Ge,
+    RelAcc,
+    DrTraf,
+    DrRain,
+    DrNi,
+    DrLike,
+    TrDu,
+    MAccE,
+    SDAccE,
+    MRotE,
+    # SDRotE,
+    MSp,
+    SDSp,
+    MATP,
+    SDATP,
+    MRTP,
+    SDRTP,
+    MJF,
+    SDJF,
+    MFFSPEED,
+    AGE,
+    TA,
+    Ex,
+    Agr,
+    Co,
+    Ne,
+    Op,
+    TNsc,
+    SA,
+    MMnDHR,
+    AMnDHR,
+    S,
+    DrExp,
+    SAE5,
+    TextDr,
+    TalkDr,
+    CoffeeDr,
+    Tickets,
+    Crash,
+    ReRdRg,
+    DrMo
+  )
+
+
+D = D %>% mutate(
+  TextDr = recode(
+    TextDr,
+    "Never" = "No",
+    "Only in stop lights" = "Yes",
+    "Sometimes" = "Yes",
+    "Often" = "Yes"
+  )
+) %>% mutate(
+  TalkDr = recode(
+    TalkDr,
+    "Never" = "No",
+    "Sometimes and I hold it" = "Yes",
+    "Sometimes but hands-free" = "Yes"
+  )
+) %>% mutate(Crash = recode(
+  Crash,
+  "None" = "No",
+  "1" = "Yes",
+  "2-3" = "Yes",
+  ">3" = "Yes"
+)) %>% mutate(Tickets = recode(
+  Tickets,
+  "None" = "None",
+  "1" = "One_or_More")) %>% mutate(SAE5 = recode(
+    SAE5,
+    "I will always drive" = "Drive_Always",
+    "I will drive sometimes" = "Drive_Sometimes",
+    "I will let the car always drive" = "Car_Drives"
+  ))
+
+D$DrLike <- relevel(factor(D$DrLike), ref = "Yes")
+D$DrExp <- relevel(factor(D$DrExp), ref = "> 4 Yr")
+D$TextDr <- relevel(factor(D$TextDr), ref = "Yes")
+D$TalkDr <- relevel(factor(D$TalkDr), ref = "Yes")
+D$CoffeeDr <- relevel(factor(D$CoffeeDr), ref = "Sometimes")
+D$Tickets <- relevel(factor(D$Tickets), ref = "None")
+D$Crash <- relevel(factor(D$Crash), ref = "No")
+D$DrMo <- relevel(factor(D$DrMo), ref = "Normal")
+D$ReRdRg <- relevel(factor(D$ReRdRg), ref = "Other (Specify)")
+D$SAE5 <- relevel(factor(D$SAE5), ref = "Drive_Always")
+```
+
+
+
+```{r, echo=FALSE}
+Coor_D = D
+Coor_D= Coor_D %>% dplyr::select (c(Y, Ge, TA, Ex, Agr, Co, Ne, Op, TNsc, SA, Dbin, TrTi, MSp, MJF, WI, MATP, MAccE, MRotE))
+
+
+
+Coor_D = Coor_D %>% mutate(Dbin = recode(Dbin, "Weekday" = 2, "Weekend" = 1)) %>%
+  mutate(TrTi = recode(TrTi, "Morning" = 1, "Afternoon" = 2)) %>%
+  mutate(WI = recode(WI, "Clear" = 1, "Clouds" = 2, "Rain" = 3, "OT" = 4)) %>%
+  mutate(Ge = recode(Ge, "Female" = 1, "Male" = 2))
+
+Coor_D = Coor_D %>% dplyr::rename(
+  DHR = Y,
+  GEN = Ge,
+  TA = TA,
+  B5A = Agr,
+  B5C = Co,
+  B5E = Ex,
+  B5N = Ne,
+  B5O = Op,
+  MA = SA,
+  TLX = TNsc,
+  DI = Dbin,
+  PI = TrTi,
+  SP = MSp,
+  TH = MATP,
+  JF = MJF,
+  Ea = MAccE,
+  Er = MRotE,
+  WE = WI
+)
+
+
+modified_ticks = c(
+  "GEN" = expression(bolditalic(GEN)),
+  "TA" = expression(bolditalic(TA)),
+  "B5A" = expression(bolditalic(B5A)),
+  "B5C" = expression(bolditalic(B5C)),
+  "B5E" = expression(bolditalic(B5E)),
+  "B5N" = expression(bolditalic(B5N)),
+  "B5O" = expression(bolditalic(B5O)),
+  "MA" = expression(bolditalic(MA)),
+  "TLX" = expression(bolditalic(TLX)),
+  "DI" = expression(bolditalic(DI)),
+  "PI" = expression(bolditalic(PI)),
+  "SP" = expression(bar(bolditalic(SP))),
+  "TH" = expression(bar(bolditalic(TH))),
+  "Ea" = expression(bar(bolditalic(E))[bolditalic(a)]),
+  "Er" = expression(bar(bolditalic(E))[bolditalic(r)]),
+  "JF" = expression(bar(bolditalic(JF))),
+  "WE" = expression(bolditalic(WE))
+)
+corr <- round(cor(Coor_D), 1)
+pearson_cor <- ggcorrplot(
+  corr,
+  hc.order = TRUE,
+  # type = "lower",
+  outline.col = "white",
+  ggtheme = ggplot2::theme_gray,
+  colors = c("#6D9EC1", "white", "#E46726"),
+  lab = TRUE,
+  lab_size = 2,
+  title = "Correlation plot"
+) + theme(
+  axis.text.x = element_text(size = 10, angle = 90),
+  axis.text.y = element_text(size = 10),
+  legend.title = element_blank(),
+  legend.position = "bottom",
+  # plot.title = element_text(hjust = 0.5),
+  plot.title = element_blank()
+)  +
+  scale_x_discrete(
+    limits = c(
+      "GEN",
+      "TA",
+      "B5A",
+      "B5C",
+      "B5E",
+      "B5N",
+      "B5O",
+      "MA",
+      "TLX",
+      "DI",
+      "PI",
+      "SP",
+      "TH",
+      "Ea",
+      "Er",
+      "JF",
+      "WE"
+    ),
+    labels = modified_ticks
+  ) +
+  scale_y_discrete(
+    limits = c(
+      "GEN",
+      "TA",
+      "B5A",
+      "B5C",
+      "B5E",
+      "B5N",
+      "B5O",
+      "MA",
+      "TLX",
+      "DI",
+      "PI",
+      "SP",
+      "TH",
+      "Ea",
+      "Er",
+      "JF",
+      "WE"
+    ),
+    labels = modified_ticks
+  )
+
+print(pearson_cor)
+
+filename <- "Figure4.pdf"
+full_path <- file.path(plot_dir, filename)
+ggsave(
+  full_path,
+  pearson_cor,
+  width = 8.5,
+  height = 5.5,
+  units = "in"
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

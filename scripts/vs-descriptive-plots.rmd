@@ -1,0 +1,425 @@
+---
+title: "General Survey"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+library(gridExtra)
+library(grid)
+library(tidyverse)
+library(plyr)	
+library(janitor)	
+library(zoo)	
+library(ggpubr)	
+library(scales)
+library(hash)
+library(ggimage)
+library(ggrepel)
+library(forcats)
+library(scales)
+library(reshape)
+```
+
+```{r, echo=FALSE}
+root_dir <- getwd()
+project_directory<-dirname(root_dir)
+raw_data_dir <- file.path(project_directory, 'data')
+plot_dir <- file.path(project_directory, 'plots')
+script_dir<- file.path(project_directory, 'scripts')
+log_dir <- file.path(project_directory, 'log-files')
+```
+
+
+```{r, echo=FALSE}
+file_name = 'Adhoc_Trait_Data.csv'
+Adhoc_Data = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
+```
+
+```{r, echo=FALSE}
+
+DR_Exp_data = data.frame(Adhoc_Data %>% dplyr::count(DrExp))
+DR_Exp_data = DR_Exp_data %>% mutate(Percentage = 100*(n / sum(n))) 
+
+DR_Exp = ggplot(DR_Exp_data, aes(x = DrExp, y = Percentage, fill = DrExp)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  theme_bw() +
+  scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100)) +
+  theme(
+    legend.position = "none",
+    panel.grid = element_blank(),
+    legend.title = element_blank(),
+    axis.title.x = element_blank(),
+    # axis.title.y = element_blank(),
+    axis.title.y = element_text(size = 10, face = "bold"),
+    axis.text.x = element_text(size = 10, face = "bold"),
+    axis.text.y = element_text(size = 10, face = "bold"),
+    plot.title = element_text(size = 10, face = "bold", hjust = 0.5)
+  ) + scale_fill_manual(breaks = c("1-4 Yr", "> 4 Yr"),
+                        values = c("snow3", "gray48")) + scale_x_discrete(limits = c("1-4 Yr", "> 4 Yr")) + labs(y = "%  of Participants", title = "Driving Experience")
+DR_Exp
+
+
+
+
+
+Com_data_only = Adhoc_Data %>% dplyr::count(Comm)
+Com_data_only = Com_data_only %>% mutate(Percentage = 100*(n / sum(n))) 
+Comm_only = ggplot(Com_data_only, aes(x = Comm, y = Percentage, fill = Comm)) +
+  geom_bar(stat = "identity", width = 0.5) + 
+  theme_bw() + 
+  scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100)) +
+  theme(
+    legend.position = "none",
+    panel.grid = element_blank(),
+    legend.title = element_blank(),
+    # axis.title.y = element_text(size = 12, face = "bold"),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text.x = element_text(size = 10, face = "bold"),
+    axis.text.y = element_blank(),
+    legend.text = element_text(size = 10, face = "bold"),
+        plot.title = element_text(size = 10, face = "bold", hjust = 0.5)
+  ) + labs(title = "Commuter Status") + scale_fill_manual(
+    breaks = c("No-Commute", "Commute"),
+    values = c("snow3", "gray48")
+  ) + scale_x_discrete(limits = c("No-Commute", "Commute"))
+Comm_only
+
+
+# Comm_Data = data.frame(Adhoc_Data %>% group_by(Comm, Mil) %>% dplyr::count(Mil))
+Comm_Data = data.frame(Adhoc_Data %>% group_by(Mil) %>% dplyr::count(Mil))
+Comm_Data = Comm_Data %>% mutate(Percentage = 100*(n / sum(n)))
+# Comm_Data = Comm_Data %>% add_row(Comm = "Commute", Mil = "10-30 Miles", n = 0, )
+# Comm_Data$SD = sd(Comm_Data$n)
+DR_Comm = ggplot(Comm_Data, aes(x = Mil, y = Percentage, fill = Mil)) +
+  geom_bar(stat = "identity", width = 0.5) + 
+  theme_bw() + 
+  scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100)) +
+  theme(
+    legend.position = "none",
+    panel.grid = element_blank(),
+    legend.title = element_blank(),
+    # axis.title.y = element_text(size = 12, face = "bold"),
+    # axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text.x = element_text(size = 10, face = "bold"),
+    axis.text.y = element_blank(),
+    legend.text = element_text(size = 10, face = "bold"),
+    plot.title = element_text(size = 10, face = "bold", hjust = 0.5)
+  ) + labs(title = "Weekly Mileage") + scale_fill_manual(
+    # breaks = c("20-30 Mi", "30-50 Mi"),
+    breaks = c("< 50 Mi", "> 50 Mi"),
+    values = c("snow3", "gray48"))
+   # + xlab("Reported Weekly Mileage")
+DR_Comm
+
+
+
+temp <- count(Adhoc_Data$DrLike)
+colnames(temp) <- c("item", "cou")
+temp <- temp[!(temp$item == ""),]
+temp <- temp %>% mutate(item = factor(x = item, levels = item))
+temp <- temp %>% mutate(Percentage = 100 * (cou / sum(cou)))
+Dr_like <-
+  ggplot(data = temp, aes(x = item, y = Percentage, fill = item)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  theme_bw() +
+  scale_y_continuous(breaks = seq(0, 100, by = 5), limits = c(0, 100)) +
+  labs(title =  "Like Driving?") +
+  theme(
+    legend.position = "none",
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(hjust = 0.5, size = 10, face = "bold"),
+    axis.title.x = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text.x = element_text(face = "bold", size = 10),
+    axis.text.y = element_blank(),
+    axis.title.y = element_blank()
+  ) + scale_fill_manual(breaks = c("No", "Yes"), values = c("snow3", "gray48")) + 
+  scale_x_discrete(limits = c("No", "Yes"))
+print(Dr_like)
+
+```
+
+
+```{r, echo=FALSE}
+trait_boxplot <- ggplot(Adhoc_Data, aes(x = "", y = Trait_Anxiety)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "", title = "Trait Anxiety") +
+  theme(
+    axis.title.x = element_text(size = 10),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 10),
+    axis.text.x = element_blank(),
+    axis.title.y = element_blank(),
+    legend.position = "none",
+    axis.text.y = element_text(size = 10, face = "bold")
+  )
+trait_boxplot
+
+
+
+
+colnames(Adhoc_Data)
+
+BFI_Data = data.frame(Adhoc_Data[,38:42])
+BFI_Data = melt(BFI_Data)
+BFI_boxplots <-
+  ggplot(BFI_Data, aes(x = factor(variable), y = value)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "", title = "Big Five Inventory") +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(face = "bold", size = 9),
+    axis.text.y = element_text(face = "bold", size = 10),
+    axis.title.y = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 9.5)
+  ) +
+  scale_y_continuous(breaks = seq(2, 10, by = 2), limits = c(0, 10))
+
+
+BFI_boxplots
+
+
+```
+
+
+
+
+
+
+
+```{r, echo=FALSE}
+file_name = 'Model_Data.csv'
+
+Model_Data = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
+
+
+BOX_Data <- subset(Model_Data,select = c(Mean_Raw_HR, Mean_Speed, Mean_ATP, Mean_JF))
+```
+
+
+```{r, echo=FALSE}
+main_title = c("Driving HR", "Speed", "Throttle", "Jam Factor")
+y_title = c("[ BPM ]", "[ MPH ]", "[ ° ]", "")
+
+plot_box_HR <- ggplot(BOX_Data, aes(x = "", y = BOX_Data[, 1])) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "", y = y_title[1], title = main_title[1]) +
+  theme(
+    axis.title.x = element_text(size = 10),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(hjust = 0.5,
+                              face = "bold",
+                              size = 10),
+    axis.text.x = element_blank(),
+    # axis.title.y = element_blank(),
+    legend.position = "none",
+    axis.text.y = element_text(size = 10, face = "bold")
+  )
+print(plot_box_HR)
+
+
+
+plot_box_Speed <- ggplot(BOX_Data, aes(x = "", y = BOX_Data[, 2])) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "", y = y_title[2], title = main_title[2]) +
+  theme(
+    axis.title.x = element_text(size = 10),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(hjust = 0.5,
+                              face = "bold",
+                              size = 10),
+    axis.text.x = element_blank(),
+    # axis.title.y = element_blank(),
+    legend.position = "none",
+    axis.text.y = element_text(size = 10, face = "bold")
+  )
+print(plot_box_Speed)
+
+
+plot_box_Throttle <- ggplot(BOX_Data, aes(x = "", y = BOX_Data[, 3])) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "", y = y_title[3], title = main_title[3]) +
+  theme(
+    axis.title.x = element_text(size = 10),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(hjust = 0.5,
+                              face = "bold",
+                              size = 10),
+    axis.text.x = element_blank(),
+    # axis.title.y = element_blank(),
+    legend.position = "none",
+    axis.text.y = element_text(size = 10, face = "bold")
+  )
+print(plot_box_Throttle)
+
+
+
+plot_box_JF <- ggplot(BOX_Data, aes(x = "", y = BOX_Data[, 4])) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "", y = y_title[4], title = main_title[4]) +
+  theme(
+    axis.title.x = element_text(size = 10),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(hjust = 0.5,
+                              face = "bold",
+                              size = 10),
+    axis.text.x = element_blank(),
+    # axis.title.y = element_blank(),
+    legend.position = "none",
+    axis.text.y = element_text(size = 10, face = "bold")
+  )
+print(plot_box_JF)
+
+
+
+
+
+```
+
+
+```{r, echo=FALSE}
+Weather_Data = Model_Data %>% dplyr::count(Weather_Info, sort = TRUE)
+
+Weather_Data = Weather_Data %>% mutate(Perentage = n/sum(n) *100)
+
+weather_boxplot = ggplot(data = Weather_Data, aes(x = Weather_Info, y = Perentage)) + 
+  geom_bar(stat = "identity") +
+  labs(title = "Weather", y = "[ % ]") +
+  theme_bw()+
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(face = "bold", size = 9),
+    axis.text.y = element_text(face = "bold", size = 10),
+    axis.title.y = element_text(face = "bold", size = 10),
+    axis.title.x = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 10)
+  ) + scale_x_discrete(limits = c("Clear", "Clouds", "Rain", "OT"))
+weather_boxplot
+```
+
+
+```{r, echo=FALSE}
+Hand_Data = subset(Model_Data, select = c(mean_acc_energy, mean_rot_energy))
+
+Hand_Data_Melt = melt(Hand_Data)
+
+modified_ticks = c(
+  "mean_acc_energy" = expression(bar(bolditalic(E[a]))),
+  "mean_rot_energy" = expression(bar(bolditalic(E[r]))))
+
+Hand_boxplots <-
+  ggplot(Hand_Data_Melt, aes(x = variable, y = value)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(title = "Hand Energy") +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(face = "bold", size = 9),
+    axis.text.y = element_text(face = "bold", size = 10),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 10)
+  ) + scale_x_discrete(labels = modified_ticks)
+Hand_boxplots
+```
+
+```{r, echo=FALSE}
+
+SA_boxplots <-
+  ggplot(Model_Data, aes(x = "", y = State_Anxiety)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(title = "Morning Anxiety") +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(face = "bold", size = 9),
+    axis.text.y = element_text(face = "bold", size = 10),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 10)
+  ) 
+SA_boxplots
+
+
+
+NASA_Data = subset(Model_Data,select = c(MD, PD, TD, P, E, F))
+NASA_Data_Melt = melt(NASA_Data)
+
+modified_ticks = c(
+  "MD" = expression(bolditalic(TLX[MD])),
+  "PD" = expression(bolditalic(TLX[PD])),
+  "TD" = expression(bolditalic(TLX[TD])),
+  "P" = expression(bolditalic(TLX[P])),
+  "E" = expression(bolditalic(TLX[E])),
+  "F" = expression(bolditalic(TLX[F]))
+  )
+
+NASA_boxplots <-
+  ggplot(NASA_Data_Melt, aes(x = variable, y = value)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(title = "NASA TLX") +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(face = "bold", size = 9),
+    axis.text.y = element_text(face = "bold", size = 10),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 10)
+  ) + scale_x_discrete(labels = modified_ticks)
+NASA_boxplots
+```
+
+```{r, echo=FALSE}
+first_row = plot_grid(plot_box_HR, plot_box_Speed, plot_box_Throttle, Hand_boxplots, ncol = 4)
+first_row
+
+second_row = plot_grid(plot_box_JF, weather_boxplot, nrow = 1, rel_widths = c(.5,1.5))
+second_row
+
+third_row = plot_grid(SA_boxplots, NASA_boxplots, nrow = 1, rel_widths = c(.5,1.5))
+third_row
+
+fourth_row = plot_grid(trait_boxplot, BFI_boxplots, nrow = 1, rel_widths = c(.5,1.5))
+fourth_row
+
+
+figure1 = plot_grid(first_row, second_row, third_row, fourth_row, nrow = 4, scale = c(.93, .93, .93, .93), labels = c("a", "b", "c", "d"), label_size = 20)
+
+
+filename <- "Figure2.pdf"
+full_path <- file.path(plot_dir, filename)
+ggsave(
+  full_path,
+  figure1,
+  width = 8.5,
+  height = 11,
+  units = "in"
+)
+```

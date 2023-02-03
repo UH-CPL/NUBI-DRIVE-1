@@ -1,0 +1,271 @@
+---
+title: "MeanofMean"
+output: pdf_document
+date: '2022-09-09'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(gplots)
+library(lme4)
+library(nlme)
+library(sjPlot)
+library(lmerTest)
+library(glmmTMB)
+library(sjPlot)
+library(dplyr)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+library(ggpubr)
+library(cowplot)
+```
+
+
+```{r, echo=FALSE, warning=FALSE}
+root_dir <- getwd()
+project_directory<-dirname(root_dir)
+raw_data_dir <- file.path(project_directory, 'data')
+curated_data_dir <- file.path(project_directory, 'curated-data')
+plot_dir <- file.path(project_directory, 'plots')
+script_dir<- file.path(project_directory, 'scripts')
+log_dir <- file.path(project_directory, 'log-files')
+```
+
+
+```{r, echo=FALSE}
+alpha<-0.05
+
+file_name = "Non_Driving_Data.csv"
+MeanData = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
+
+
+S<-as.factor(MeanData$P_ID)
+
+HR_NON_DRIVE<-MeanData$HR_NON_DRIVE
+
+
+### Here are the Fixed Effects
+TA<-MeanData$Trait_Anxiety
+Ex<-MeanData$Extraversion
+Agr<-MeanData$Agreeableness
+Co<-MeanData$Conscientiousness
+Ne<-MeanData$Neuroticism
+Op<-MeanData$Openness
+SA<-MeanData$State_Anxiety
+Ge<-MeanData$Gender
+
+
+DData<-data.frame(HR_NON_DRIVE,TA,Ex,Agr,Co,Ne,Op,SA,Ge,S)
+
+VarNames<-c("NonDriving Heart Rate","Trait Anxiety","Extraversion","Agreeableness",
+            "Conscientiousness","Neuroticism","Openness","State_Anxiety","Gender","Subject ID")
+
+
+FullModel<-lmer(HR_NON_DRIVE ~ 1 + TA + Ex + Agr + Co + Ne + Op + SA + Ge + (1|S), data=DData)
+summary(FullModel)
+
+
+
+
+HR<-c(MeanData$HR_NON_DRIVE,MeanData$HR_DRIVE)
+
+
+
+
+
+S<-as.factor(c(MeanData$P_ID,MeanData$P_ID))
+
+
+DRind<-factor(rep(c("NonDriving","Driving"),each=dim(MeanData)[1]),levels=c("NonDriving","Driving"))
+
+
+### Factor for Day number (1-7 corresponding Monday to Sunday)
+DN<-as.factor(c(MeanData$DAYS,MeanData$DAYS))
+# table(DN)
+
+Dbin<-rep("Weekday",length(DN))
+Dbin[(DN=="Day6")|((DN=="Day7"))]<-"Weekend"
+Dbin<-as.factor(Dbin)
+# table(Dbin)
+
+### Factor for the Time of the Trip (Morning/Afternoon)
+TrTi<-factor(c(MeanData$TIME_OF_DAY,MeanData$TIME_OF_DAY),levels=c("Morning","Afternoon"))
+# table(TrTi)
+
+
+DData<-data.frame(HR,DRind,DN, Dbin,TrTi,S)
+
+VarNames<-c("Heart Rate","Driving Indicator",
+            "Day Number","Weekday/Weekend indicator",
+            "Trip Time","Subject ID")
+
+### The following are the categorical explanatory variable
+tmpCAT<-c(2:5)
+
+### The following are the numerical explanatory variable
+tmpNUM<-1
+
+
+### Here we plot the response (HR and HRnorm) versus the Categorical Predictors
+for (j in tmpCAT){ ### here we will loop over the CATEGORICAL explanatory variables
+  Y<-HR
+  tmpX<-DData[,j]
+  ### The ANOVA and Mixed Model for the HR (raw data)
+  tmpaov<-aov(Y~tmpX)
+  #print(summary(tmpaov))
+  pval<-round(summary(tmpaov)[[1]][["Pr(>F)"]][1],3)
+  tmpFM<-lme(Y~1+tmpX,random=~1|S, na.action=na.omit)
+  #summary(tmpFM)
+  #anova(tmpFM)
+  pvalMM<-round(anova(tmpFM)[[4]][2],3)
+  
+  quartz()
+  par(mfcol=c(2,1),mar=c(2.5,2,2,1.5),mgp=c(1.2,0.5,0),oma=c(0.5,0.5,1.5,0.5))
+  boxplot(Y~tmpX,ylab=paste(VarNames[1]),xlab=paste(VarNames[j]),main=
+            paste("AoV pval = ",pval," [ MM pval = ",pvalMM,"]"))
+  plotmeans(Y~tmpX,ylab=paste(VarNames[1]),xlab=paste(VarNames[j]),main=
+              paste("( AoV pval = ",pval," [ MM pval = ",pvalMM,"]"))
+  title(paste("HR versus",VarNames[j]),
+        outer=TRUE, cex.main=1.5,col.main="blue", line=0)
+}
+
+
+
+
+
+
+
+
+
+### Full Model with two interactions
+FullModel_HR<-lmer(HR ~ 1 + DRind + Dbin + TrTi + DRind:Dbin + DRind:TrTi + (1|S),data=DData)
+summary(FullModel_HR)
+anova(FullModel_HR)
+```
+
+
+
+
+```{r, echo=FALSE}
+levels = c("A", "B", "C")
+num = c(5, 10, 15)
+ymin = c(0, 0, 0)
+ymax = c(1, 2, 3)
+
+Legend_DF = data.frame(levels, num, ymin, ymax)
+
+
+
+plot <- ggplot(Legend_DF, aes(x = levels, y = num, colour = levels)) +
+  geom_errorbar(aes(ymin = ymin, ymax = ymax), size = 1.1) +
+  theme_bw() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text.x = element_text(face = "bold", size = 10),
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.title = element_blank(),
+    legend.key.width = unit(2, 'cm'),
+    legend.text = element_text(size = 20)
+  ) +
+  theme(axis.ticks.y = element_blank(),
+        axis.ticks.x = element_blank()) +
+  scale_color_manual(
+    values = c("#4CAEE3", "#ee9a00", "red"),
+    breaks = c("A", "B", "C"),
+    labels = c("*     ", "**     ", "***")
+  ) 
+print(plot)
+
+legend = get_legend(plot)
+```
+
+```{r, echo=FALSE}
+
+
+ticks_font = element_text(size = 9, face = "bold")
+title_font = element_text(size = 9, face = "bold", hjust = 0.5)
+orange = "#ee9a00"
+blue = "#4CAEE3"
+y_titie = expression(paste(bar(bolditalic("NHR")), bold(" [ BPM ]")))
+
+
+Gender_Mean = plot_model(FullModel, "pred", terms = "Ge") +
+  aes(color = c("Female", "Male")) + 
+  scale_color_manual(labels = c("Female", "Male"),values = c("gray", "orange")) +
+theme_bw() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "none",
+    panel.grid = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = title_font,
+    axis.text.x = ticks_font,
+    axis.text.y = ticks_font,
+    plot.title = title_font,
+  ) + labs(y = y_titie, title = "Gender") + ylim(60, 100)
+
+Gender_Mean
+
+
+
+CON_mean = plot_model(FullModel, "pred", terms = "Co") +
+  aes(color = "Co") +
+  scale_color_manual(values = blue) +
+  geom_vline(
+    xintercept = mean(MeanData$Conscientiousness),
+    linetype = "dashed",
+    color = "gray",
+    size = 1
+  ) +
+  theme_bw() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "none",
+    panel.grid = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.x = ticks_font,
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    plot.title = title_font
+  ) + labs(title= "Conscientiousness") + ylim(60, 100)
+CON_mean
+
+
+y_titie = expression(paste(bar(bolditalic("HR")), bold(" [ BPM ]")))
+
+Trip_Time = plot_model(FullModel_HR, "pred", terms = "TrTi") +
+  aes(color = c("Morning", "Afternoon")) + 
+  scale_color_manual(labels = c("Morning", "Afternoon"),values = c("red", "gray")) +
+theme_bw() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "none",
+    panel.grid = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = title_font,
+    axis.text.x = ticks_font,
+    axis.text.y = ticks_font,
+    plot.title = title_font
+  ) + labs(y = y_titie, title = "Period Indicator") + ylim(60, 100)
+Trip_Time
+
+
+
+non_drive_plots = plot_grid(Gender_Mean, CON_mean, nrow = 1)
+non_drive_plots_HR = plot_grid(non_drive_plots, Trip_Time, ncol = 2, rel_widths = c(2, 1), labels = c("a", "b"), scale = c(.95, 0.95))
+non_drive_plots_final = plot_grid(non_drive_plots_HR, legend, nrow = 2, rel_heights = c(1, .05))
+
+print(non_drive_plots_final)
+file_name = "Figure6.pdf"
+ggsave(
+  file.path(plot_dir, file_name),
+  non_drive_plots_final,
+  width = 8.5,
+  height = 2.75,
+  units = "in"
+)
+```
+
