@@ -35,7 +35,7 @@ log_dir <- file.path(project_directory, 'log-files')
 
 
 ```{r, echo=FALSE}
-file_name = 'Adhoc_Trait_Data_v1.csv'
+file_name = 'Adhoc_Trait_Data.csv'
 Adhoc_Data = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
 ```
 
@@ -205,9 +205,6 @@ BFI_boxplots
 file_name = 'Model_Data.csv'
 
 Model_Data = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
-
-Model_Data = Model_Data[,c(1:5, 11, 14, 16, 20, 41, 43, 46, 80:92)]
-
 BOX_Data <- subset(Model_Data,select = c(Mean_Raw_HR, Mean_Speed, Mean_ATP, Mean_JF))
 ```
 
