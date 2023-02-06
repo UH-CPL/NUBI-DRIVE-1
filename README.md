@@ -27,7 +27,7 @@ Packages are available on CRAN and can be installed using a simple call to `inst
 - vs-non-driving-model.rmd
     - Generates the non driveng model and the model figure
 
-**---------------------Version with Text-----------------------**
+## Data Descriptor
 
 **Age**     Age     **Continous**
 
