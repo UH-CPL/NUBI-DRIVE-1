@@ -28,7 +28,7 @@ Packages are available on CRAN and can be installed using a simple call to `inst
     - Generates the non driveng model and the model figure
 
 ## Data Descriptor
-- Model_Data.csv
+- **Model_Data.csv**
 	- **P_ID**: Participant's ID
 	- **Day_Num**: Observation day of the study Day1 = Monday, Day7 = Sunday
 	- **Trips**: Trip number of a particular day
@@ -55,7 +55,7 @@ Packages are available on CRAN and can be installed using a simple call to `inst
 	- **E** : NASA effort
 	- **F** : NASA frustration
 	
-- Non_Driving_Data.csv
+- **Non_Driving_Data.csv**
 	- **P_ID**: Participant's ID
 	- **Days**: Observation day of the study Day1 = Monday, Day7 = Sunday
 	- **Day_Indicator**: Indication of weekdays or weekend [weekdays, weekend]
@@ -71,7 +71,7 @@ Packages are available on CRAN and can be installed using a simple call to `inst
 	- **Open**: Openness
 	- **State_Anxiety**: 
 	
-- Trait_Data.csv
+- **Trait_Data.csv**
 	- **P_ID**: Participant's ID
 	- **TA**: Trait_Anxiety	
 	- **Ext**: Extraversion	
