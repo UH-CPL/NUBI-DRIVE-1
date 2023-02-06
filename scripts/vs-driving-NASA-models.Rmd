@@ -1,5 +1,5 @@
 ---
-title: "Analysis & Models"
+title: "Driving and NASA Models"
 output: pdf_document
 date: '2022-09-08'
 ---
@@ -33,20 +33,15 @@ log_dir <- file.path(project_directory, 'log-files')
 ```
 
 ```{r, echo=FALSE}
-file_name = 'Model_Data.csv'
+file_name = 'Model_Data_v1.csv'
 tmpD = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
-
 ```
 
-
-
 ```{r, echo=FALSE}
-alpha<-0.05
+
 S<-as.factor(tmpD$P_ID)
 Mean_Raw_HR<-tmpD$Mean_Raw_HR
 Y<-Mean_Raw_HR
-MMnDHR<-tmpD$Morning_Mean_Non_Drive_Hr
-AMnDHR<-tmpD$Afternoon_Mean_Non_Drive_Hr
 DN<-as.factor(tmpD$Day_Num)
 
 Dbin<-rep("Weekday",length(DN))
@@ -58,37 +53,11 @@ TrTi<-factor(tmpD$Trip_Time,levels=c("Morning","Afternoon"))
 TrNu<-as.factor(tmpD$Trips)
 WI<-as.factor(tmpD$Weather_Info)
 Ge<-as.factor(tmpD$Gender)
-RelAcc<-as.factor(tmpD$Acc)
-DrTraf<-as.factor(tmpD$DrTraf)
-DrRain<-as.factor(tmpD$DrRain)
-DrNi<-as.factor(tmpD$DrNi)
-DrLike<-as.factor(tmpD$DrLike)
-AGE<-tmpD$Age
-
-
-TrDu<-tmpD$Trip_Duration
 MSp<-tmpD$Mean_Speed
-SDSp<-tmpD$SD_Speed
-
-
 MATP<-tmpD$Mean_ATP
-SDATP<-tmpD$SD_ATP
-
-MRTP<-tmpD$Mean_RTP
-SDRTP<-tmpD$SD_RTP
-
 MJF<-tmpD$Mean_JF
-SDJF<-tmpD$SD_JF
-
-
-
 MAccE<-tmpD$mean_acc_energy
-SDAccE<-tmpD$sd_acc_energy
-
 MRotE<-tmpD$mean_rot_energy
-SDRotE<-tmpD$sd_rot_energy
-
-
 TNsc<-tmpD$MD+tmpD$PD+tmpD$TD+tmpD$P+tmpD$E+tmpD$F
 NASA_MD<-tmpD$MD
 NASA_PD<-tmpD$PD
@@ -99,8 +68,6 @@ NASA_F<-tmpD$F
 
 NASAall<-data.frame(NASA_MD,NASA_PD,NASA_TD,NASA_P,NASA_E,NASA_F)
 NASAnames<-c("NASA_MD","NASA_PD","NASA_TD","NASA_P","NASA_E","NASA_F")
-
-
 SA<-tmpD$State_Anxiety
 TA<-tmpD$Trait_Anxiety
 Ex<-tmpD$Extraversion
@@ -108,50 +75,29 @@ Agr<-tmpD$Agreeableness
 Co<-tmpD$Conscientiousness
 Ne<-tmpD$Neuroticism
 Op<-tmpD$Openness
-
 ```
 
 
 
 ```{r, echo=FALSE}
-D<-data.frame(Y,DN,Dbin,TrTi,TrNu,WI,Ge,RelAcc,DrTraf,DrRain,DrNi,DrLike,TrDu,MSp,SDSp,MATP,SDATP,MRTP,SDRTP,MJF,SDJF,
-              MAccE, SDAccE, MRotE, SDRotE,
-              AGE,TA,Ex,Agr,Co,Ne,Op,TNsc,SA,MMnDHR,AMnDHR,S)
+D<-data.frame(Y, Dbin,TrTi,WI,Ge,MSp,MATP,MJF, MAccE, MRotE,TA,Ex,Agr,Co,Ne,Op,TNsc,SA,S)
 
-VarNames<-c("Mean HR",
-            "Day Number","Weekday/Weekend indicator",
-            "Trip Time","Trip Number","Weather Info","Gender",
-            "Relish Acceleration","Driving with Traffic","Driving with Rain",
-            "Driving at Night","Like to drive",
-            "Trip Duration","Mean Speed","SD Speed","Mean Absolute Throtle Position", 
-            "SD Absolute Throtle Position","Mean Relative Throtle Position", 
-            "SD Relative Throtle Position","Mean Jam Factor","SD Jam Factor",
-            "Mean Accelerometer Energy","SD Accelerometer Energy",
-            "Mean Rotation Energy","SD Rotation Energy",
-            "Age","Trait Anxiety","Extraversion",
+VarNames<-c("Mean HR", "Weekday/Weekend indicator",
+            "Trip Time","Weather Info","Gender",
+            "Mean Speed","Mean Absolute Throtle Position", 
+            "Mean Relative Throtle Position", 
+            "Mean Jam Factor","SD Jam Factor",
+            "Mean Accelerometer Energy",
+            "Mean Rotation Energy",
+            "Trait Anxiety","Extraversion",
             "Agreeableness","Conscientiousness","Neuroticism","Openness",
-            "Total NASA score", "State Anxiety",
-            "Morning_Mean_Non_Drive_Hr","Afternoon_Mean_Non_Drive_Hr","Subject ID")
-
-### The following are the categorical explanatory variable
-tmpCAT<-c(3:13)
-
-### The following are the numerical explanatory variable
-tmpNUM<-c(14:33)
+            "Total NASA score", "State Anxiety","Subject ID")
 
 
 
 NASAall$Dbin = Dbin
 NASAall$TrTi = TrTi
 NASAall$S = S
-
-
-Non_Drive_HR <- c(MMnDHR, AMnDHR)
-MAind<-c(rep("Morning", length(MMnDHR)),rep("Afternoon", length(AMnDHR)))
-MAind<-factor(MAind,levels=c("Morning","Afternoon"))
-
-WEind<-c(Dbin,Dbin)
-WEind<-factor(WEind,levels=c("Weekday","Weekend"))
 
 Sub<-as.factor(c(S,S))
 

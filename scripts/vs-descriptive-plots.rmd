@@ -7,7 +7,6 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(ggplot2)
-library(cowplot)
 library(gridExtra)
 library(grid)
 library(tidyverse)
@@ -22,6 +21,7 @@ library(ggrepel)
 library(forcats)
 library(scales)
 library(reshape)
+library(cowplot)
 ```
 
 ```{r, echo=FALSE}
@@ -35,7 +35,7 @@ log_dir <- file.path(project_directory, 'log-files')
 
 
 ```{r, echo=FALSE}
-file_name = 'Adhoc_Trait_Data.csv'
+file_name = 'Adhoc_Trait_Data_v1.csv'
 Adhoc_Data = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
 ```
 
@@ -172,7 +172,7 @@ trait_boxplot
 
 colnames(Adhoc_Data)
 
-BFI_Data = data.frame(Adhoc_Data[,38:42])
+BFI_Data = data.frame(Adhoc_Data[,6:10])
 BFI_Data = melt(BFI_Data)
 BFI_boxplots <-
   ggplot(BFI_Data, aes(x = factor(variable), y = value)) +
@@ -206,6 +206,7 @@ file_name = 'Model_Data.csv'
 
 Model_Data = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
 
+Model_Data = Model_Data[,c(1:5, 11, 14, 16, 20, 41, 43, 46, 80:92)]
 
 BOX_Data <- subset(Model_Data,select = c(Mean_Raw_HR, Mean_Speed, Mean_ATP, Mean_JF))
 ```
@@ -413,7 +414,7 @@ fourth_row
 figure1 = plot_grid(first_row, second_row, third_row, fourth_row, nrow = 4, scale = c(.93, .93, .93, .93), labels = c("a", "b", "c", "d"), label_size = 20)
 
 
-filename <- "Figure2.pdf"
+filename <- "Figure2_v.pdf"
 full_path <- file.path(plot_dir, filename)
 ggsave(
   full_path,

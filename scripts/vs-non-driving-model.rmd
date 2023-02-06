@@ -1,5 +1,5 @@
 ---
-title: "MeanofMean"
+title: "Non-Driving model"
 output: pdf_document
 date: '2022-09-09'
 ---
@@ -34,18 +34,14 @@ log_dir <- file.path(project_directory, 'log-files')
 
 
 ```{r, echo=FALSE}
-alpha<-0.05
+
 
 file_name = "Non_Driving_Data.csv"
 MeanData = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
 
 
 S<-as.factor(MeanData$P_ID)
-
 HR_NON_DRIVE<-MeanData$HR_NON_DRIVE
-
-
-### Here are the Fixed Effects
 TA<-MeanData$Trait_Anxiety
 Ex<-MeanData$Extraversion
 Agr<-MeanData$Agreeableness
@@ -69,14 +65,7 @@ summary(FullModel)
 
 
 HR<-c(MeanData$HR_NON_DRIVE,MeanData$HR_DRIVE)
-
-
-
-
-
 S<-as.factor(c(MeanData$P_ID,MeanData$P_ID))
-
-
 DRind<-factor(rep(c("NonDriving","Driving"),each=dim(MeanData)[1]),levels=c("NonDriving","Driving"))
 
 
@@ -105,36 +94,6 @@ tmpCAT<-c(2:5)
 
 ### The following are the numerical explanatory variable
 tmpNUM<-1
-
-
-### Here we plot the response (HR and HRnorm) versus the Categorical Predictors
-for (j in tmpCAT){ ### here we will loop over the CATEGORICAL explanatory variables
-  Y<-HR
-  tmpX<-DData[,j]
-  ### The ANOVA and Mixed Model for the HR (raw data)
-  tmpaov<-aov(Y~tmpX)
-  #print(summary(tmpaov))
-  pval<-round(summary(tmpaov)[[1]][["Pr(>F)"]][1],3)
-  tmpFM<-lme(Y~1+tmpX,random=~1|S, na.action=na.omit)
-  #summary(tmpFM)
-  #anova(tmpFM)
-  pvalMM<-round(anova(tmpFM)[[4]][2],3)
-  
-  quartz()
-  par(mfcol=c(2,1),mar=c(2.5,2,2,1.5),mgp=c(1.2,0.5,0),oma=c(0.5,0.5,1.5,0.5))
-  boxplot(Y~tmpX,ylab=paste(VarNames[1]),xlab=paste(VarNames[j]),main=
-            paste("AoV pval = ",pval," [ MM pval = ",pvalMM,"]"))
-  plotmeans(Y~tmpX,ylab=paste(VarNames[1]),xlab=paste(VarNames[j]),main=
-              paste("( AoV pval = ",pval," [ MM pval = ",pvalMM,"]"))
-  title(paste("HR versus",VarNames[j]),
-        outer=TRUE, cex.main=1.5,col.main="blue", line=0)
-}
-
-
-
-
-
-
 
 
 
