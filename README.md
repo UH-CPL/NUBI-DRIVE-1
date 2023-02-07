@@ -48,12 +48,12 @@ Packages are available on CRAN and can be installed using a simple call to `inst
 	- **Neuro**: Neuroticism, the level of participant’s nervousness with score range [2-10]	
 	- **Open**: Openness, the level of participant’s curiosity with score range [2-10]
 	- **State_Anxiety**: State anxiety, the psychometric measurement of how participants feel right at the moment, with a score range [20–80]
-	- **MD** : NASA mental demand
-	- **PD** : NASA physical demand
-	- **TD** : NASA temporal demand
-	- **P** : NASA performance
-	- **E** : NASA effort
-	- **F** : NASA frustration
+	- **MD** : Perceived mental load induced by morning/afternoon drives
+	- **PD** : Perceived physical activity induced by morning/afternoon drives
+	- **TD** : Perceived time pressure induced by morning/afternoon drive
+	- **P** : Perceived success in executing morning/afternoon drive
+	- **E** : Perceived amount of work expended to achieve said performance in morning/afternoon drive
+	- **F** : Perceived level of irritation in performing morning/afternoon drive
 	
 - **Non_Driving_Data.csv**
 	- **P_ID**: Participant's ID
