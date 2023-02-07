@@ -41,13 +41,13 @@ Packages are available on CRAN and can be installed using a simple call to `inst
 	- **mean_acc_energy**: Mean hand acceleration
 	- **mean_rot_energy**: Mean hand rotaion
 	- **Gender**: [Male/Female]
-	- **TA**: Trait Anxiety	of the participants
-	- **Ext**: Extraversion	
-	- **Agr**: Agreeableness	
-	- **Cons**: Conscientiousness	
-	- **Neuro**: Neuroticism	
-	- **Open**: Openness
-	- **State_Anxiety**: 
+	- **TA**: Trait Anxiety, a psychometric measurement of how participants generally feel, with a score range [20–80]
+	- **Ext**: Extraversion, the level of participant’s outgoing nature with score range [2-10]
+	- **Agr**: Agreeableness, the level of participant’s friendliness with score range [2-10]	
+	- **Cons**: Conscientiousness, the level of participant’s organized nature with score range [2-10]
+	- **Neuro**: Neuroticism, the level of participant’s nervousness with score range [2-10]	
+	- **Open**: Openness, the level of participant’s curiosity with score range [2-10]
+	- **State_Anxiety**: State anxiety, the psychometric measurement of how participants feel right at the moment, with a score range [20–80]
 	- **MD** : NASA mental demand
 	- **PD** : NASA physical demand
 	- **TD** : NASA temporal demand
@@ -63,19 +63,19 @@ Packages are available on CRAN and can be installed using a simple call to `inst
 	- **HR_Drive**: Mean heart rate of driving
 	- **HR_NON_DRIVE**: Mean heart rate of non-driving
 	- **Gender**: [Male/Female]
-	- **TA**: Trait Anxiety	of the participants
-	- **Ext**: Extraversion	
-	- **Agr**: Agreeableness	
-	- **Cons**: Conscientiousness	
-	- **Neuro**: Neuroticism	
-	- **Open**: Openness
-	- **State_Anxiety**: 
+	- **TA**: Trait Anxiety, a psychometric measurement of how participants generally feel, with a score range [20–80]
+	- **Ext**: Extraversion, the level of participant’s outgoing nature with score range [2-10]
+	- **Agr**: Agreeableness, the level of participant’s friendliness with score range [2-10]	
+	- **Cons**: Conscientiousness, the level of participant’s organized nature with score range [2-10]
+	- **Neuro**: Neuroticism, the level of participant’s nervousness with score range [2-10]	
+	- **Open**: Openness, the level of participant’s curiosity with score range [2-10]
+	- **State_Anxiety**: State anxiety, the psychometric measurement of how participants feel right at the moment, with a score range [20–80]
 	
 - **Trait_Data.csv**
 	- **P_ID**: Participant's ID
-	- **TA**: Trait_Anxiety	
-	- **Ext**: Extraversion	
-	- **Agr**: Agreeableness	
-	- **Cons**: Conscientiousness	
-	- **Neuro**: Neuroticism	
-	- **Open**: Openness
+	- **TA**: Trait Anxiety, a psychometric measurement of how participants generally feel, with a score range [20–80]
+	- **Ext**: Extraversion, the level of participant’s outgoing nature with score range [2-10]
+	- **Agr**: Agreeableness, the level of participant’s friendliness with score range [2-10]	
+	- **Cons**: Conscientiousness, the level of participant’s organized nature with score range [2-10]
+	- **Neuro**: Neuroticism, the level of participant’s nervousness with score range [2-10]	
+	- **Open**: Openness, the level of participant’s curiosity with score range [2-10]
