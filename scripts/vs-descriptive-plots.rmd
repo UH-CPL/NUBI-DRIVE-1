@@ -63,7 +63,7 @@ trait_boxplot
 
 colnames(Adhoc_Data)
 
-BFI_Data = data.frame(Adhoc_Data[,6:10])
+BFI_Data = data.frame(Adhoc_Data[,3:7])
 BFI_Data = melt(BFI_Data)
 BFI_boxplots <-
   ggplot(BFI_Data, aes(x = factor(variable), y = value)) +
