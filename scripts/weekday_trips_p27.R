@@ -6,7 +6,8 @@ library(scales)
 library(plotly)
 library(patchwork)
 library(grid)
-
+library(ggbreak) 
+library(ggh4x)
 #time function
 get_time <- function(col) {
   return(as.POSIXct(strptime(col, "%Y-%m-%d %H:%M:%S"), format = "%H:%M:%S"))
@@ -71,7 +72,7 @@ n_nd= as.numeric(length(unique(trips_nd$trip_ID)))
 ######weekdays limits
 
 lims <- as.POSIXct(strptime(c("06:00","21:00"), format = "%H:%M"))    
-library(ggbreak) 
+
 
 #### weekday plots
 #time cloumn
@@ -113,14 +114,14 @@ p <- p +facet_wrap(vars(label),
         strip.text = element_text(size = 15),legend.text=element_text(size=12))
 
 #adding breaks to allow better vision of lines
-library(ggbreak)
+
 p <- p+ scale_x_break(c(as.POSIXct(strptime(c("07:10","11:00"), format = "%H:%M")) )) 
 p <- p+ scale_x_break(c(as.POSIXct(strptime(c("12:30","16:00"), format = "%H:%M")) )) 
 p <- p+ scale_x_break(c(as.POSIXct(strptime(c("17:10","17:45"), format = "%H:%M")) )) 
 p <- p+ scale_x_break(c(as.POSIXct(strptime(c("19:30","20:30"), format = "%H:%M")) )) 
 p
 #save
-library(ggh4x)
+
 pdf.options(reset = TRUE, onefile = FALSE)
 ggsave(file="Figure3.pdf",plot=p,device="pdf",width=11,height=8)
 
@@ -128,7 +129,7 @@ ggsave(file="Figure3.pdf",plot=p,device="pdf",width=11,height=8)
 ######weekend limits
 
 lims <- as.POSIXct(strptime(c("07:00","20:00"), format = "%H:%M"))    
-library(ggbreak) 
+
 
 ####weekend plots
 #time column
@@ -170,13 +171,11 @@ p <- p +facet_wrap(vars(label),
          strip.text = element_text(size = 15),legend.text=element_text(size=12))
 
 #adding breaks to allow better vision of lines
-library(ggbreak)
 p <- p+ scale_x_break(c(as.POSIXct(strptime(c("08:15","12:45"), format = "%H:%M")) )) 
 p <- p+ scale_x_break(c(as.POSIXct(strptime(c("13:15","16:45"), format = "%H:%M")) )) 
 p <- p+ scale_x_break(c(as.POSIXct(strptime(c("17:15","18:45"), format = "%H:%M")) )) 
 p
 
-library(ggh4x)
 #save
 pdf.options(reset = TRUE, onefile = FALSE)
 ggsave(file="Figure3_weekend.pdf",plot=p,device="pdf",width=11,height=8)
