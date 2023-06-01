@@ -33,7 +33,7 @@ log_dir <- file.path(project_directory, 'log-files')
 ```
 
 ```{r, echo=FALSE}
-file_name = 'Model_Data_v1.csv'
+file_name = 'Model_Data.csv'
 tmpD = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
 ```
 
@@ -144,9 +144,10 @@ legend = get_legend(plot)
 orange = "#ee9a00"
 blue = "#4CAEE3"
 
-ticks_font = element_text(size = 8, face = "bold")
-title_font = element_text(size = 9, face = "bold", hjust = 0.5)
-legend_font = element_text(size = 8, face = "bold")
+ticks_font_x = element_text(size = 12, face = "bold", angle = 15, hjust = .9)
+ticks_font_y = element_text(size = 12, face = "bold")
+title_font = element_text(size = 12, face = "bold", hjust = 0.5)
+legend_font = element_text(size = 10, face = "bold")
 
 y_titie = expression(bolditalic(TLX[E]))
 
@@ -168,8 +169,8 @@ Nasa_effort_1 = plot_model(Nasa_Effort_Model, type = "pred", terms = "TrTi") +
     panel.grid = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = title_font,
-    axis.text.x = ticks_font,
-    axis.text.y = ticks_font,
+    axis.text.x = ticks_font_x,
+    axis.text.y = ticks_font_y,
     plot.title = element_blank()
   ) + labs(y = y_titie) +  ylim(.5, 3)
 # Nasa_effort_1
@@ -190,12 +191,12 @@ Nasa_effort_2 = plot_model(Nasa_Effort_Model,
     panel.grid = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
-    axis.text.x = ticks_font,
+    axis.text.x = ticks_font_x,
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
     plot.title = element_blank()
   ) + ylim(.5, 3)
-# Nasa_effort_2
+Nasa_effort_2
 
 
 y_titie = expression(bolditalic(TLX[TD]))
@@ -209,8 +210,8 @@ NASA_TD_plot1 = plot_model(Nasa_Temporal_model, type = "pred", terms = "Dbin") +
     panel.grid = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = title_font,
-    axis.text.x = ticks_font,
-    axis.text.y = ticks_font,
+    axis.text.x = ticks_font_x,
+    axis.text.y = ticks_font_y,
     plot.title = element_blank()
   ) + labs(y = y_titie) + ylim(.5, 3)
 # NASA_TD_plot1
@@ -228,6 +229,7 @@ NASA_Model_Plot =
       nrow = 1,
       scale = c(.97, .97),
       labels = c("a", "b"),
+      label_size = 20,
       rel_widths = c(1, 2)
     ),
     legend,
@@ -242,7 +244,7 @@ ggsave(
   file.path(plot_dir, file_name),
   NASA_Model_Plot,
   width = 8.5,
-  height = 2.75,
+  height = 3.75,
   units = "in"
 )
 ```
@@ -263,8 +265,8 @@ summary(FM)
 
 
 ```{r, echo=FALSE, warning=FALSE}
-ticks_font = element_text(size = 9, face = "bold")
-title_font = element_text(size = 9, face = "bold", hjust = 0.5)
+ticks_font = element_text(size = 12, face = "bold")
+title_font = element_text(size = 14, face = "bold", hjust = 0.5)
 orange = "#ee9a00"
 blue = "#4CAEE3"
 
@@ -281,7 +283,7 @@ theme_bw() +
     panel.grid = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = title_font,
-    axis.text.x = ticks_font,
+    axis.text.x = element_text(size = 11, face = "bold", hjust = 0.6),
     axis.text.y = ticks_font,
     plot.title = element_blank(),
   ) + labs(y = y_titie) + ylim(70, 100)
@@ -298,7 +300,7 @@ WeekWeekend = plot_model(FM, "pred", terms = "Dbin") +
     panel.grid = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
-    axis.text.x = ticks_font,
+    axis.text.x = element_text(size = 11, face = "bold", hjust = 0.6),
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
     plot.title = element_blank()
@@ -316,7 +318,7 @@ MornAft = plot_model(FM, "pred", terms = "TrTi") +
     panel.grid = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
-    axis.text.x = ticks_font,
+    axis.text.x = element_text(size = 11, face = "bold", hjust = 0.3),
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
     plot.title = element_blank()
@@ -402,7 +404,7 @@ grid1 = plot_grid(Gender, WeekWeekend, MornAft, ncol = 3)
 grid2 = plot_grid(Trait, CON, Speed, ncol = 3)
 
 
-final_plot = plot_grid(grid1, legend, grid2, nrow = 3, labels = c("a", "", "b"), scale = c(.95, 0.95,.95), rel_heights = c(1,.1,1))
+final_plot = plot_grid(grid1, legend, grid2, nrow = 3, labels = c("a", "", "b"), scale = c(.95, 0.95,.95), rel_heights = c(1,.1,1), label_size = 20)
 final_plot
 
 file_name = "Figure5.pdf"

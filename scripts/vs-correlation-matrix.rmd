@@ -36,7 +36,7 @@ log_dir <- file.path(project_directory, 'log-files')
 
 
 ```{r, echo=FALSE}
-file_name = 'Model_Data_v1.csv'
+file_name = 'Model_Data.csv'
 Data = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
 ```
 
@@ -139,23 +139,50 @@ modified_ticks = c(
   "WE" = expression(bolditalic(WE))
 )
 corr <- round(cor(Coor_D), 1)
+```
+
+```{r, echo=FALSE}
+name_order = c(
+      "GEN",
+      "TA",
+      "B5A",
+      "B5C",
+      "B5E",
+      "B5N",
+      "B5O",
+      "MA",
+      "TLX",
+      "DI",
+      "PI",
+      "SP",
+      "TH",
+      "Ea",
+      "Er",
+      "JF",
+      "WE"
+    )
+
+corr =  corr[name_order , name_order]
+```
+
+
+```{r, echo=FALSE}
 pearson_cor <- ggcorrplot(
   corr,
-  hc.order = TRUE,
-  # type = "lower",
+  type = "upper",
   outline.col = "white",
-  ggtheme = ggplot2::theme_gray,
+  ggtheme = ggplot2::theme_bw(),
   colors = c("#6D9EC1", "white", "#E46726"),
   lab = TRUE,
-  lab_size = 2,
+  lab_size = 3.5,
   title = "Correlation plot"
-) + theme(
-  axis.text.x = element_text(size = 10, angle = 90),
+)  +theme(
+  panel.grid = element_blank(),
+  axis.text.x = element_text(size = 10, angle = 60),
   axis.text.y = element_text(size = 10),
   legend.title = element_blank(),
-  legend.position = "bottom",
-  # plot.title = element_text(hjust = 0.5),
-  plot.title = element_blank()
+  plot.title = element_blank(),
+  legend.position = c(.75, .6)
 )  +
   scale_x_discrete(
     limits = c(
@@ -181,23 +208,23 @@ pearson_cor <- ggcorrplot(
   ) +
   scale_y_discrete(
     limits = c(
-      "GEN",
-      "TA",
-      "B5A",
-      "B5C",
-      "B5E",
-      "B5N",
-      "B5O",
-      "MA",
-      "TLX",
-      "DI",
-      "PI",
-      "SP",
-      "TH",
-      "Ea",
-      "Er",
+      "WE",
       "JF",
-      "WE"
+      "Er",
+      "Ea",
+      "TH",
+      "SP",
+      "PI",
+      "DI",
+      "TLX",
+      "MA",
+      "B5O",
+      "B5N",
+      "B5E",
+      "B5C",
+      "B5A",
+      "TA",
+      "GEN"
     ),
     labels = modified_ticks
   )
@@ -214,8 +241,6 @@ ggsave(
   units = "in"
 )
 ```
-
-
 
 
 

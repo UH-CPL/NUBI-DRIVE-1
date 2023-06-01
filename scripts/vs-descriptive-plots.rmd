@@ -37,6 +37,9 @@ log_dir <- file.path(project_directory, 'log-files')
 ```{r, echo=FALSE}
 file_name = 'Trait_Data.csv'
 Adhoc_Data = read.csv(file.path(raw_data_dir, file_name), stringsAsFactors = FALSE)
+
+ticks_size = 12
+title_size = 14
 ```
 
 
@@ -47,23 +50,33 @@ trait_boxplot <- ggplot(Adhoc_Data, aes(x = "", y = Trait_Anxiety)) +
   theme_bw() +
   labs(x = "", title = "Trait Anxiety") +
   theme(
-    axis.title.x = element_text(size = 10),
+    axis.title.x = element_text(size = ticks_size),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 10),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = title_size),
     axis.text.x = element_blank(),
     axis.title.y = element_blank(),
     legend.position = "none",
-    axis.text.y = element_text(size = 10, face = "bold")
+    axis.text.y = element_text(size = ticks_size, face = "bold")
   )
 trait_boxplot
 
 
 
 
-colnames(Adhoc_Data)
 
-BFI_Data = data.frame(Adhoc_Data[,3:7])
+
+
+modified_ticks = c(
+  "Extraversion" = expression(bolditalic(B5[E])),
+  "Agreeableness" = expression(bolditalic(B5[A])),
+  "Conscientiousness" = expression(bolditalic(B5[C])),
+  "Neuroticism" = expression(bolditalic(B5[N])),
+  "Openness" = expression(bolditalic(B5[O]))
+  )
+
+
+BFI_Data = data.frame(Adhoc_Data[, 3:7])
 BFI_Data = melt(BFI_Data)
 BFI_boxplots <-
   ggplot(BFI_Data, aes(x = factor(variable), y = value)) +
@@ -73,13 +86,12 @@ BFI_boxplots <-
   theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    axis.text.x = element_text(face = "bold", size = 9),
-    axis.text.y = element_text(face = "bold", size = 10),
+    axis.text.x = element_text(face = "bold", size = 14),
+    axis.text.y = element_text(face = "bold", size = ticks_size),
     axis.title.y = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 9.5)
-  ) +
-  scale_y_continuous(breaks = seq(2, 10, by = 2), limits = c(0, 10))
-
+    axis.title.x = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = title_size)
+  ) + scale_y_continuous(breaks = seq(2, 10, by = 2), limits = c(0, 10)) + scale_x_discrete(labels = modified_ticks)
 
 BFI_boxplots
 
@@ -109,16 +121,16 @@ plot_box_HR <- ggplot(BOX_Data, aes(x = "", y = BOX_Data[, 1])) +
   theme_bw() +
   labs(x = "", y = y_title[1], title = main_title[1]) +
   theme(
-    axis.title.x = element_text(size = 10),
+    axis.title.x = element_text(size = ticks_size),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     plot.title = element_text(hjust = 0.5,
                               face = "bold",
-                              size = 10),
+                              size = title_size),
     axis.text.x = element_blank(),
-    # axis.title.y = element_blank(),
+    axis.title.y = element_text(size = ticks_size, face = "bold"),
     legend.position = "none",
-    axis.text.y = element_text(size = 10, face = "bold")
+    axis.text.y = element_text(size = ticks_size, face = "bold")
   )
 print(plot_box_HR)
 
@@ -129,16 +141,16 @@ plot_box_Speed <- ggplot(BOX_Data, aes(x = "", y = BOX_Data[, 2])) +
   theme_bw() +
   labs(x = "", y = y_title[2], title = main_title[2]) +
   theme(
-    axis.title.x = element_text(size = 10),
+    axis.title.x = element_text(size = ticks_size),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     plot.title = element_text(hjust = 0.5,
                               face = "bold",
-                              size = 10),
+                              size = title_size),
     axis.text.x = element_blank(),
-    # axis.title.y = element_blank(),
+    axis.title.y = element_text(size = ticks_size, face = "bold"),
     legend.position = "none",
-    axis.text.y = element_text(size = 10, face = "bold")
+    axis.text.y = element_text(size = ticks_size, face = "bold")
   )
 print(plot_box_Speed)
 
@@ -148,16 +160,16 @@ plot_box_Throttle <- ggplot(BOX_Data, aes(x = "", y = BOX_Data[, 3])) +
   theme_bw() +
   labs(x = "", y = y_title[3], title = main_title[3]) +
   theme(
-    axis.title.x = element_text(size = 10),
+    axis.title.x = element_text(size = ticks_size),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     plot.title = element_text(hjust = 0.5,
                               face = "bold",
-                              size = 10),
+                              size = title_size),
     axis.text.x = element_blank(),
-    # axis.title.y = element_blank(),
+    axis.title.y = element_text(size = ticks_size, face = "bold"),
     legend.position = "none",
-    axis.text.y = element_text(size = 10, face = "bold")
+    axis.text.y = element_text(size = ticks_size, face = "bold")
   )
 print(plot_box_Throttle)
 
@@ -168,16 +180,16 @@ plot_box_JF <- ggplot(BOX_Data, aes(x = "", y = BOX_Data[, 4])) +
   theme_bw() +
   labs(x = "", y = y_title[4], title = main_title[4]) +
   theme(
-    axis.title.x = element_text(size = 10),
+    axis.title.x = element_text(size = ticks_size),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     plot.title = element_text(hjust = 0.5,
                               face = "bold",
-                              size = 10),
+                              size = title_size),
     axis.text.x = element_blank(),
-    # axis.title.y = element_blank(),
+    axis.title.y = element_text(size = ticks_size, face = "bold"),
     legend.position = "none",
-    axis.text.y = element_text(size = 10, face = "bold")
+    axis.text.y = element_text(size = ticks_size, face = "bold")
   )
 print(plot_box_JF)
 
@@ -200,11 +212,11 @@ weather_boxplot = ggplot(data = Weather_Data, aes(x = Weather_Info, y = Perentag
   theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    axis.text.x = element_text(face = "bold", size = 9),
-    axis.text.y = element_text(face = "bold", size = 10),
-    axis.title.y = element_text(face = "bold", size = 10),
+    axis.text.x = element_text(face = "bold", size = ticks_size),
+    axis.text.y = element_text(face = "bold", size = ticks_size),
+    axis.title.y = element_text(face = "bold", size = ticks_size),
     axis.title.x = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 10)
+    plot.title = element_text(hjust = 0.5, face = "bold", size = title_size)
   ) + scale_x_discrete(limits = c("Clear", "Clouds", "Rain", "OT"))
 weather_boxplot
 ```
@@ -227,11 +239,11 @@ Hand_boxplots <-
   theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    axis.text.x = element_text(face = "bold", size = 9),
-    axis.text.y = element_text(face = "bold", size = 10),
+    axis.text.x = element_text(face = "bold", size = ticks_size),
+    axis.text.y = element_text(face = "bold", size = ticks_size),
     axis.title.y = element_blank(),
     axis.title.x = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 10)
+    plot.title = element_text(hjust = 0.5, face = "bold", size = title_size)
   ) + scale_x_discrete(labels = modified_ticks)
 Hand_boxplots
 ```
@@ -246,11 +258,11 @@ SA_boxplots <-
   theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    axis.text.x = element_text(face = "bold", size = 9),
-    axis.text.y = element_text(face = "bold", size = 10),
+    axis.text.x = element_text(face = "bold", size = ticks_size),
+    axis.text.y = element_text(face = "bold", size = ticks_size),
     axis.title.y = element_blank(),
     axis.title.x = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 10)
+    plot.title = element_text(hjust = 0.5, face = "bold", size = title_size)
   ) 
 SA_boxplots
 
@@ -276,11 +288,11 @@ NASA_boxplots <-
   theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    axis.text.x = element_text(face = "bold", size = 9),
-    axis.text.y = element_text(face = "bold", size = 10),
+    axis.text.x = element_text(face = "bold", size = ticks_size),
+    axis.text.y = element_text(face = "bold", size = ticks_size),
     axis.title.y = element_blank(),
     axis.title.x = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 10)
+    plot.title = element_text(hjust = 0.5, face = "bold", size = title_size)
   ) + scale_x_discrete(labels = modified_ticks)
 NASA_boxplots
 ```
@@ -302,7 +314,7 @@ fourth_row
 figure1 = plot_grid(first_row, second_row, third_row, fourth_row, nrow = 4, scale = c(.93, .93, .93, .93), labels = c("a", "b", "c", "d"), label_size = 20)
 
 
-filename <- "Figure2_v.pdf"
+filename <- "Figure2_V2.pdf"
 full_path <- file.path(plot_dir, filename)
 ggsave(
   full_path,

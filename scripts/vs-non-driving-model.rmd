@@ -143,8 +143,8 @@ legend = get_legend(plot)
 ```{r, echo=FALSE}
 
 
-ticks_font = element_text(size = 9, face = "bold")
-title_font = element_text(size = 9, face = "bold", hjust = 0.5)
+ticks_font = element_text(size = 12, face = "bold")
+title_font = element_text(size = 14, face = "bold", hjust = 0.5)
 orange = "#ee9a00"
 blue = "#4CAEE3"
 y_titie = expression(paste(bar(bolditalic("NHR")), bold(" [ BPM ]")))
@@ -205,7 +205,7 @@ theme_bw() +
     panel.grid = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = title_font,
-    axis.text.x = ticks_font,
+    axis.text.x = element_text(size = 12, face = "bold", hjust = .7),
     axis.text.y = ticks_font,
     plot.title = title_font
   ) + labs(y = y_titie, title = "Period Indicator") + ylim(60, 100)
@@ -214,7 +214,7 @@ Trip_Time
 
 
 non_drive_plots = plot_grid(Gender_Mean, CON_mean, nrow = 1)
-non_drive_plots_HR = plot_grid(non_drive_plots, Trip_Time, ncol = 2, rel_widths = c(2, 1), labels = c("a", "b"), scale = c(.95, 0.95))
+non_drive_plots_HR = plot_grid(non_drive_plots, Trip_Time, ncol = 2, rel_widths = c(2, 1), labels = c("a", "b"), scale = c(.95, 0.95), label_size = 20)
 non_drive_plots_final = plot_grid(non_drive_plots_HR, legend, nrow = 2, rel_heights = c(1, .05))
 
 print(non_drive_plots_final)
@@ -223,7 +223,7 @@ ggsave(
   file.path(plot_dir, file_name),
   non_drive_plots_final,
   width = 8.5,
-  height = 2.75,
+  height = 3.75,
   units = "in"
 )
 ```
